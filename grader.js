@@ -26,7 +26,6 @@ var fs = require('fs');
 var rest = require('restler');
 var program = require('commander');
 var cheerio = require('cheerio');
-var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
 
 var assertFileExists = function(infile) {
@@ -40,10 +39,19 @@ var assertFileExists = function(infile) {
 
 var assertUrlExists = function(inurl) {
     var instr = inurl.toString();
-    rest.head(instr).on('error', function(err, response) {
-        console.log("%s is invalid. Error: %s.", instr, err.message);
-        process.exit(1);
+    
+    rest.get(instr).on('complete', function(result, response) {
+        if (result instanceof Error) {
+            console.log("%s is invalid. Error: %s.", instr, result.message);
+            process.exit(1);
+        } else if (response.statusCode != 200) {
+            console.log("%s is invalid. Status Code: %d.", instr, response.statusCode);
+            process.exit(1);
+        }
+        
+        console.log("url get complete!");
     });
+     
     return instr;
 };
 
@@ -52,9 +60,11 @@ var cheerioHtmlFile = function(htmlfile) {
 };
 
 var cheerioHttpUrl = function(httpurl) {
-    rest.get(httpurl).on('success', function(result, response) {
-        return cheerio.load(result);
+    rest.get(httpurl).on('success', function(data) {
+        return cheerio.load(data);
     });
+    
+    return cheerio.load("");
 };
 
 var loadChecks = function(checksfile) {
@@ -92,17 +102,23 @@ var clone = function(fn) {
 if(require.main == module) {
     program
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
-        .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+        .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists))
         .option('-u, --url <http_url>', 'Full http url', clone(assertUrlExists))
         .parse(process.argv);
-    var checkJson = null;
+        
     if (program.file) {
-        checkJson = checkHtmlFile(program.file, program.checks);
+        var checkJson = checkHtmlFile(program.file, program.checks);
     } else if (program.url) {
-        checkJson = checkHttpUrl(program.url, program.checks);
+        var checkJson = checkHttpUrl(program.url, program.checks);
+    } else {
+        console.log("Invalid command line.");
+        process.exit(1);
     }
-    var outJson = JSON.stringify(checkJson, null, 4);
-    console.log(outJson);
+
+    if (checkJson) {
+        var outJson = JSON.stringify(checkJson, null, 4);
+        console.log(outJson);
+    }
 } else {
     exports.checkHtmlFile = checkHtmlFile;
     exports.checkHttpUrl = checkHttpUrl;
