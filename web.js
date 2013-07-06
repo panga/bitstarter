@@ -3,22 +3,23 @@ var express = require('express'),
 
 var app = express.createServer(express.logger());
 
-function handler (req, res) {
-  fs.readFile(__dirname + '/index.html',
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index.html');
-    }
+function indexHandler(req, res) {
+    fs.readFile(__dirname + "/index.html",
 
-    res.writeHead(200);
-    res.end(data);
-  });
+    function(err, data) {
+        if (err) {
+            res.writeHead(500);
+            return res.end(err);
+        }
+
+        res.writeHead(200);
+        res.end(data);
+    });
 }
 
-app.get('/', handler);
+app.get("/", indexHandler);
 
 var port = process.env.PORT || 5000;
 app.listen(port, function() {
-  console.log("Listening on " + port);
+    console.log("Listening on " + port);
 });
