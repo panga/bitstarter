@@ -37,34 +37,8 @@ var assertFileExists = function(infile) {
     return instr;
 };
 
-var assertUrlExists = function(inurl) {
-    var instr = inurl.toString();
-    
-    rest.get(instr).on('complete', function(result, response) {
-        if (result instanceof Error) {
-            console.log("%s is invalid. Error: %s.", instr, result.message);
-            process.exit(1);
-        } else if (response.statusCode != 200) {
-            console.log("%s is invalid. Status Code: %d.", instr, response.statusCode);
-            process.exit(1);
-        }
-        
-        console.log("url get complete!");
-    });
-     
-    return instr;
-};
-
 var cheerioHtmlFile = function(htmlfile) {
     return cheerio.load(fs.readFileSync(htmlfile));
-};
-
-var cheerioHttpUrl = function(httpurl) {
-    rest.get(httpurl).on('success', function(data) {
-        return cheerio.load(data);
-    });
-    
-    return cheerio.load("");
 };
 
 var loadChecks = function(checksfile) {
@@ -83,14 +57,26 @@ var checkHtmlFile = function(htmlfile, checksfile) {
 };
 
 var checkHttpUrl = function(httpurl, checksfile) {
-    var $ = cheerioHttpUrl(httpurl);
-    var checks = loadChecks(checksfile).sort();
-    var out = {};
-    for(var ii in checks) {
-        var present = $(checks[ii]).length > 0;
-        out[checks[ii]] = present;
-    }
-    return out;
+    rest.get(httpurl).on('complete', function(result, response) {
+        if (result instanceof Error) {
+            console.log("Error: %s", result.message);
+            process.exit(1);
+        } else if (response.statusCode != 200) {
+            console.log("Invalid URL. Status Code: %d", response.statusCode);
+            process.exit(1);
+        }
+        
+        var $ = cheerio.load(result);
+        var checks = loadChecks(checksfile).sort();
+        var out = {};
+        for(var ii in checks) {
+            var present = $(checks[ii]).length > 0;
+            out[checks[ii]] = present;
+        }
+        
+        var outJson = JSON.stringify(out, null, 4);
+        console.log(outJson);
+    });
 };
 
 var clone = function(fn) {
@@ -103,22 +89,20 @@ if(require.main == module) {
     program
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists))
-        .option('-u, --url <http_url>', 'Full http url', clone(assertUrlExists))
+        .option('-u, --url <http_url>', 'Full http url')
         .parse(process.argv);
         
     if (program.file) {
         var checkJson = checkHtmlFile(program.file, program.checks);
+        var outJson = JSON.stringify(checkJson, null, 4);
+        console.log(outJson);
     } else if (program.url) {
-        var checkJson = checkHttpUrl(program.url, program.checks);
+        checkHttpUrl(program.url, program.checks);
     } else {
         console.log("Invalid command line.");
         process.exit(1);
     }
-
-    if (checkJson) {
-        var outJson = JSON.stringify(checkJson, null, 4);
-        console.log(outJson);
-    }
+    
 } else {
     exports.checkHtmlFile = checkHtmlFile;
     exports.checkHttpUrl = checkHttpUrl;
