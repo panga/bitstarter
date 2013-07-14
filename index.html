@@ -3,15 +3,18 @@
     
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>My First Bitstarter</title>
-        <link type="text/css" rel="stylesheet" href="http://twitter.github.io/bootstrap/assets/css/bootstrap.css">
+        <!--<link type="text/css" rel="stylesheet" href="http://twitter.github.io/bootstrap/assets/css/bootstrap.css">-->
+        <link type="text/css" rel="stylesheet" href="http://twitter.github.io/bootstrap/assets/css/bootstrap-responsive.css">
+        <link type="text/css" rel="stylesheet" href="http://necolas.github.io/normalize.css/2.1.2/normalize.css">
         <style type="text/css">
             body {
                 padding-top: 20px;
                 padding-bottom: 40px;
             }
-            .container {
-                width: 960px;
+            .row-fluid {
+                border: 1px solid;
             }
             .lead {
                 padding-top: 15px;
@@ -31,15 +34,12 @@
                 height: 40px;
                 line-height: 40px;
             }
-            .row {
-                border: 1px solid;
-            }
         </style>
     </head>
     
     <body>
-        <div class="container">
-            <div class="row navigation">
+        <div class="container-fluid">
+            <div class="row-fluid navigation">
                 <div class="span2 logo">
                     Logo
                 </div>
@@ -51,19 +51,19 @@
                 </div>
             </div>
             
-            <div class="row heading">
+            <div class="row-fluid heading">
                 <div class="span12">
                     <h1>Bitstarter Title</h1>
                 </div>
             </div>
             
-            <div class="row subheading">
+            <div class="row-fluid subheading">
                 <div class="span12">
                     <p class="lead">This is my first bitstarter project.</p>
                 </div>
             </div>
             
-            <div class="row pitch">
+            <div class="row-fluid pitch">
                 <div class="span6 video">
                     Video
                 </div>
@@ -80,25 +80,25 @@
                 </div>
             </div>
             
-            <div class="row section1">
+            <div class="row-fluid section1">
                 <div class="span12">
                     Marketing Section 1
                 </div>
             </div>
             
-            <div class="row section2">
+            <div class="row-fluid section2">
                 <div class="span12">
                     Marketing Section 2
                 </div>
             </div>
             
-            <div class="row faq">
+            <div class="row-fluid faq">
                 <div class="span12">
                     FAQ
                 </div>
             </div>
             
-            <div class="row footer">
+            <div class="row-fluid footer">
                 <div class="span12">
                     Footer
                 </div>
